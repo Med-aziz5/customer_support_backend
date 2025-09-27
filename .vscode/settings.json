@@ -1,0 +1,15 @@
+{
+  "workbench.colorCustomizations": {
+    "[Default Dark+]": {
+      "titleBar.inactiveBackground": "#ff6f61",
+      "titleBar.activeBackground": "#ff6f61",
+      "titleBar.inactiveForeground": "#ffffff",
+      "titleBar.activeForeground": "#ffffff"
+    }
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.formatOnSave": true
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "cs-backend",
+  "version": "1.0.0",
+  "description": "To make it easy for you to get started with GitLab, here's a list of recommended next steps.",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.data-tricks.net/dt-solutions/trainee-codebase/2k25/customer-support/cs-backend.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start-local": "nodemon server.js",
+    "db:migrate": "node scripts/liquibase-migrate.js",
+    "prettier": "prettier .",
+    "prettier-write": "prettier . --write"
+  },
+  "devDependencies": {
+    "liquibase": "^4.28.1",
+    "nodemon": "^3.1.10",
+    "sequelize-cli": "^6.6.3"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "joi": "^18.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-liquibase": "^4.1.1",
+    "nodemailer": "^7.0.5",
+    "pg": "^8.16.3",
+    "prettier": "^3.6.2",
+    "sequelize": "^6.37.7",
+    "sib-api-v3-sdk": "^8.5.0"
+  }
+}
