@@ -1,32 +1,26 @@
 const { Feedback, Ticket, User } = require('../models');
 const NotFoundError = require('../error/NotFoundError');
-const { fn, col } = require('sequelize');
 
-// Get all feedbacks – unchanged
 const getAllFeedbacks = async (req, res, next) => {
   try {
-    const { rows: feedbacks, count: total_count } =
-      await Feedback.findAndCountAll({
-        include: [
-          { model: Ticket, as: 'ticket' },
-          { model: User, as: 'client' },
-        ],
-      });
+    const feedbacks = await Feedback.findAll({
+      include: [
+        { model: Ticket, as: 'ticket' },
+        { model: User, as: 'client' },
+      ],
+    });
 
     if (!feedbacks.length)
       throw new NotFoundError('No feedbacks found', 'Feedback');
-
-    res.json({ data: feedbacks, total_count });
+    res.json({ data: feedbacks });
   } catch (err) {
     next(err);
   }
 };
 
-// Get feedback by ID – unchanged
 const getFeedbackById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const feedback = await Feedback.findByPk(id, {
+    const feedback = await Feedback.findByPk(req.params.id, {
       include: [
         { model: Ticket, as: 'ticket' },
         { model: User, as: 'client' },
@@ -40,39 +34,27 @@ const getFeedbackById = async (req, res, next) => {
   }
 };
 
-// Get feedback stats for an agent
 const getFeedbackByAgent = async (req, res, next) => {
   try {
-    const { agentId } = req.params;
-
     const feedbacks = await Feedback.findAll({
-      attributes: [
-        [fn('COUNT', col('Feedback.id')), 'total_feedbacks'],
-        [fn('SUM', col('Feedback.rating')), 'total_rating'],
-      ],
       include: [
         {
           model: Ticket,
           as: 'ticket',
-          attributes: [],
-          where: { assigned_to: agentId },
+          where: { assigned_to: req.params.agentId },
         },
       ],
-      raw: true,
     });
 
-    const total_feedbacks = feedbacks[0].total_feedbacks;
-    const total_rating = feedbacks[0].total_rating;
-
-    if (!total_feedbacks) {
+    if (!feedbacks.length)
       throw new NotFoundError('No feedbacks found for this agent', 'Feedback');
-    }
 
-    const average_rating = total_rating / total_feedbacks;
+    const total_rating = feedbacks.reduce((sum, f) => sum + f.rating, 0);
+    const average_rating = total_rating / feedbacks.length;
 
     res.json({
-      agentId,
-      total_feedbacks,
+      agentId: req.params.agentId,
+      total_feedbacks: feedbacks.length,
       average_rating,
     });
   } catch (err) {
@@ -80,7 +62,6 @@ const getFeedbackByAgent = async (req, res, next) => {
   }
 };
 
-// Create feedback – unchanged
 const createFeedback = async (req, res, next) => {
   try {
     const { content, rating } = req.body;
@@ -89,9 +70,6 @@ const createFeedback = async (req, res, next) => {
 
     const ticket = await Ticket.findByPk(ticket_id);
     if (!ticket) throw new NotFoundError('Ticket not found', 'Feedback');
-
-    const client = await User.findByPk(client_id);
-    if (!client) throw new NotFoundError('Client not found', 'Feedback');
 
     const feedback = await Feedback.create({
       ticket_id,
@@ -105,31 +83,21 @@ const createFeedback = async (req, res, next) => {
   }
 };
 
-// Update feedback – unchanged
 const updateFeedback = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { content, rating } = req.body;
-
-    const feedback = await Feedback.findByPk(id);
+    const feedback = await Feedback.findByPk(req.params.id);
     if (!feedback) throw new NotFoundError('Feedback not found', 'Feedback');
 
-    await feedback.update({
-      ...(content && { content }),
-      ...(rating && { rating }),
-    });
-
+    await feedback.update(req.body);
     res.json({ data: feedback });
   } catch (err) {
     next(err);
   }
 };
 
-// Delete feedback – unchanged
 const deleteFeedback = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const feedback = await Feedback.findByPk(id);
+    const feedback = await Feedback.findByPk(req.params.id);
     if (!feedback) throw new NotFoundError('Feedback not found', 'Feedback');
 
     await feedback.destroy();
@@ -139,31 +107,24 @@ const deleteFeedback = async (req, res, next) => {
   }
 };
 
-// Get current client's average rating – unchanged
 const getMyAverageRating = async (req, res, next) => {
   try {
-    const clientId = req.user.id;
+    const feedbacks = await Feedback.findAll({
+      where: { client_id: req.user.id },
+    });
 
-    const { rows: feedbacks, count: total_feedbacks } =
-      await Feedback.findAndCountAll({
-        where: { client_id: clientId },
-        attributes: ['rating'],
-        raw: true,
-      });
-
-    if (!total_feedbacks) {
+    if (!feedbacks.length)
       throw new NotFoundError(
         'No feedbacks found for your account',
         'Feedback',
       );
-    }
 
     const total_rating = feedbacks.reduce((sum, f) => sum + f.rating, 0);
-    const average_rating = total_rating / total_feedbacks;
+    const average_rating = total_rating / feedbacks.length;
 
     res.json({
-      clientId,
-      total_feedbacks,
+      clientId: req.user.id,
+      total_feedbacks: feedbacks.length,
       average_rating,
     });
   } catch (err) {
@@ -171,87 +132,75 @@ const getMyAverageRating = async (req, res, next) => {
   }
 };
 
-// Get best rated agent
 const getBestRatedAgent = async (req, res, next) => {
   try {
-    const bestAgent = await Feedback.findOne({
-      attributes: [[fn('AVG', col('rating')), 'average_rating']],
+    const feedbacks = await Feedback.findAll({
       include: [
         {
           model: Ticket,
           as: 'ticket',
-          attributes: [],
-          include: [
-            {
-              model: User,
-              as: 'assignedTo',
-              attributes: ['id', 'first_name', 'last_name', 'email'],
-            },
-          ],
+          include: [{ model: User, as: 'assignedTo' }],
         },
       ],
-      group: [
-        'ticket.assignedTo.id',
-        'ticket.assignedTo.first_name',
-        'ticket.assignedTo.last_name',
-        'ticket.assignedTo.email',
-      ],
-      order: [[fn('AVG', col('rating')), 'DESC']],
-      raw: true,
-      nest: true,
     });
 
-    if (!bestAgent) {
+    if (!feedbacks.length)
       throw new NotFoundError('No agents with feedback found', 'Feedback');
-    }
 
-    res.json({
-      agent: bestAgent.ticket.assignedTo,
-      average_rating: parseFloat(bestAgent.average_rating),
+    const ratings = {};
+    feedbacks.forEach((f) => {
+      const agent = f.ticket.assignedTo;
+      if (agent) {
+        if (!ratings[agent.id]) ratings[agent.id] = [];
+        ratings[agent.id].push(f.rating);
+      }
     });
+
+    const bestAgent = Object.entries(ratings)
+      .map(([id, arr]) => ({
+        id,
+        average: arr.reduce((a, b) => a + b, 0) / arr.length,
+      }))
+      .sort((a, b) => b.average - a.average)[0];
+
+    res.json({ agentId: bestAgent.id, average_rating: bestAgent.average });
   } catch (err) {
     next(err);
   }
 };
 
-// Get worst rated agent
 const getWorstRatedAgent = async (req, res, next) => {
   try {
-    const worstAgent = await Feedback.findOne({
-      attributes: [[fn('AVG', col('rating')), 'average_rating']],
+    const feedbacks = await Feedback.findAll({
       include: [
         {
           model: Ticket,
           as: 'ticket',
-          attributes: [],
-          include: [
-            {
-              model: User,
-              as: 'assignedTo',
-              attributes: ['id', 'first_name', 'last_name', 'email'],
-            },
-          ],
+          include: [{ model: User, as: 'assignedTo' }],
         },
       ],
-      group: [
-        'ticket.assignedTo.id',
-        'ticket.assignedTo.first_name',
-        'ticket.assignedTo.last_name',
-        'ticket.assignedTo.email',
-      ],
-      order: [[fn('AVG', col('rating')), 'ASC']],
-      raw: true,
-      nest: true,
     });
 
-    if (!worstAgent) {
+    if (!feedbacks.length)
       throw new NotFoundError('No agents with feedback found', 'Feedback');
-    }
 
-    res.json({
-      agent: worstAgent.ticket.assignedTo,
-      average_rating: worstAgent.average_rating,
+    const ratings = {};
+    feedbacks.forEach((f) => {
+      const agent = f.ticket.assignedTo;
+      if (agent) {
+        if (!ratings[agent.id]) ratings[agent.id] = [];
+        ratings[agent.id].push(f.rating);
+      }
     });
+
+    const worstAgent = Object.entries(ratings)
+      .map(([id, arr]) => ({
+        id,
+        average: arr.reduce((a, b) => a + b, 0) / arr.length,
+      }))
+      .sort((a, b) => a.average - b.average)[0];
+
+    res.json({ agentId: worstAgent.id, average_rating: worstAgent.average });
   } catch (err) {
     next(err);
   }

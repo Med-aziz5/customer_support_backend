@@ -7,13 +7,6 @@ const verifyJWT = require('../middlewares/verifyJWT');
 const allowRoles = require('../middlewares/rbacMiddleware');
 const filter = require('../middlewares/filter');
 
-/**
- * =========================
- * ADMIN ROUTES
- * =========================
- */
-
-// Get all feedbacks with optional filtering
 router.get(
   '/',
   verifyJWT,
@@ -22,7 +15,6 @@ router.get(
   feedbackController.getAllFeedbacks,
 );
 
-// Get the best rated agent
 router.get(
   '/best-agent',
   verifyJWT,
@@ -30,7 +22,6 @@ router.get(
   feedbackController.getBestRatedAgent,
 );
 
-// Get the worst rated agent
 router.get(
   '/worst-agent',
   verifyJWT,
@@ -38,7 +29,6 @@ router.get(
   feedbackController.getWorstRatedAgent,
 );
 
-// Get feedbacks by a specific agent
 router.get(
   '/agent/:agentId',
   verifyJWT,
@@ -46,7 +36,6 @@ router.get(
   feedbackController.getFeedbackByAgent,
 );
 
-// Get feedback by ID (keep last to avoid conflicts)
 router.get(
   '/:id',
   verifyJWT,
@@ -54,7 +43,6 @@ router.get(
   feedbackController.getFeedbackById,
 );
 
-// Update a feedback by ID
 router.put(
   '/:id',
   validationMiddleware(feedbackValidators.updateFeedbackSchema),
@@ -62,7 +50,6 @@ router.put(
   feedbackController.updateFeedback,
 );
 
-// Delete a feedback by ID
 router.delete(
   '/:id',
   verifyJWT,
@@ -70,13 +57,6 @@ router.delete(
   feedbackController.deleteFeedback,
 );
 
-/**
- * =========================
- * CLIENT ROUTES
- * =========================
- */
-
-// Get the current client's average rating
 router.get(
   '/my-average',
   verifyJWT,
@@ -84,7 +64,6 @@ router.get(
   feedbackController.getMyAverageRating,
 );
 
-// Create a feedback for a ticket
 router.post(
   '/ticket/:ticket_id',
   validationMiddleware(feedbackValidators.createFeedbackSchema),

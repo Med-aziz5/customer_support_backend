@@ -18,7 +18,7 @@ router.get(
 router.get(
   '/ticket/:ticketId',
   verifyJWT,
-  allowRoles('ADMIN'),
+  allowRoles('ADMIN', 'AGENT'),
   meetingController.getMeetingsByTicketId,
 );
 
