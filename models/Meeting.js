@@ -14,7 +14,7 @@ module.exports = (sequelize) => {
       },
       agent_id: {
         type: DataTypes.BIGINT,
-        allowNull: false,
+        allowNull: true,
       },
       scheduled_at: {
         type: DataTypes.DATE,

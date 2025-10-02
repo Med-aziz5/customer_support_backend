@@ -97,7 +97,7 @@ const createMeeting = async (req, res, next) => {
 
 const requestMeeting = async (req, res, next) => {
   try {
-    const { ticket_id } = req.params;
+    const { ticketId } = req.params;
     const client_id = req.user.id;
 
     const client = await User.findByPk(client_id);
@@ -113,11 +113,9 @@ const requestMeeting = async (req, res, next) => {
     }
 
     const meetingRequest = await Meeting.create({
-      ticket_id,
+      ticketId,
       client_id,
-      agent_id: ticket.assigned_to, // ✅ include assigned agent
-
-      status: 'PENDING',
+      agent_id: ticket.assigned_to,
     });
 
     res.status(201).json({ data: meetingRequest });

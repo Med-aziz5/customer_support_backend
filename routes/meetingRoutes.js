@@ -30,7 +30,7 @@ router.post(
   verifyJWT,
   meetingController.createMeeting,
 );
-router.post('/request/:ticket_id', verifyJWT, meetingController.requestMeeting);
+router.post('/request/:ticketId', verifyJWT, meetingController.requestMeeting);
 
 router.put(
   '/ticket/:id',

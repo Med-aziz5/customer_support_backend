@@ -39,26 +39,34 @@ app.use('/api/v1/notes', noteRoutes);
 // Global error handler
 app.use(ErrorHandlerModule.errorHandler);
 
-db.sequelize
-  .authenticate()
-  .then(() => console.log('Database connected'))
-  .catch((err) => console.error('Unable to connect to the database:', err));
-
 async function startServer() {
   try {
     await db.sequelize.authenticate();
-    console.log('Database connected');
+    console.log('✅ Database connected');
 
     await ensureAdmin();
 
+    // Run liquibase migrations safely
     const liquibase = new LiquibaseConfig();
-    await liquibase.runMigrations();
+    try {
+      await liquibase.runMigrations();
+      console.log('✅ Liquibase migrations complete');
+    } catch (err) {
+      if (
+        err.message &&
+        err.message.includes('Could not acquire change log lock')
+      ) {
+        console.warn('⚠️ Skipping Liquibase migration because lock exists');
+      } else {
+        throw err;
+      }
+    }
 
     app.listen(httpPort, () => {
-      console.log(`Server running on port ${httpPort}`);
+      console.log(`🚀 Server running on port ${httpPort}`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 }

@@ -6,11 +6,15 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
     <changeSet id="011-make-meeting-columns-nullable" author="Mohamed aziz mathlouthi">
-        <modifyDataType tableName="meetings" columnName="agent_id" newDataType="BIGINT"/>
-        <dropNotNullConstraint tableName="meetings" columnName="agent_id" columnDataType="BIGINT"/>
-
-        <modifyDataType tableName="meetings" columnName="scheduled_at" newDataType="TIMESTAMP"/>
-        <dropNotNullConstraint tableName="meetings" columnName="scheduled_at" columnDataType="TIMESTAMP"/>
+        <dropNotNullConstraint 
+            tableName="meetings" 
+            columnName="agent_id" 
+            columnDataType="BIGINT"/>
+            
+        <dropNotNullConstraint 
+            tableName="meetings" 
+            columnName="scheduled_at" 
+            columnDataType="TIMESTAMP"/>
     </changeSet>
 
 </databaseChangeLog>
