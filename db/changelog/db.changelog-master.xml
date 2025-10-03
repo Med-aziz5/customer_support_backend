@@ -13,7 +13,5 @@
     <include file="migrations/007-create-histories.xml" relativeToChangelogFile="true"/>
     <include file="migrations/008-create-feedbacks.xml" relativeToChangelogFile="true"/>
     <include file="migrations/009-create-notes.xml" relativeToChangelogFile="true"/>
-    <include file="migrations/010-update-users.xml" relativeToChangelogFile="true"/>
-    <include file="migrations/011-make-meeting-columns-nullable.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

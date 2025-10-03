@@ -1,10 +1,11 @@
-<?xml version="1.1" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-                   
-    <changeSet id="006-create-meetings" author="eya">
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog 
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="001-create-meetings" author="MED AZIZ MATHLOUTHI">
         <createTable tableName="meetings">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -15,12 +16,8 @@
             <column name="client_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="agent_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="scheduled_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
+            <column name="agent_id" type="BIGINT"/>
+            <column name="scheduled_at" type="TIMESTAMP"/>
             <column name="status" type="VARCHAR(20)" defaultValue="pending"/>
             <column name="meeting_link" type="VARCHAR(500)"/>
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
@@ -28,6 +25,7 @@
             <column name="deleted_at" type="TIMESTAMP"/>
         </createTable>
 
+        <!-- Foreign keys -->
         <addForeignKeyConstraint baseTableName="meetings" baseColumnNames="ticket_id"
                                  referencedTableName="tickets" referencedColumnNames="id"
                                  constraintName="fk_meetings_tickets_id"
@@ -41,4 +39,5 @@
                                  constraintName="fk_meetings_users_agent_id"
                                  onDelete="SET NULL"/>
     </changeSet>
+
 </databaseChangeLog>
