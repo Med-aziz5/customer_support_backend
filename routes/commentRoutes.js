@@ -18,7 +18,6 @@ router.get(
 router.get(
   '/ticket/:ticketId',
   verifyjwt,
-  allowRoles('ADMIN', 'AGENT'),
   commentController.getCommentsByTicket,
 );
 
@@ -34,7 +33,6 @@ router.post(
 router.put(
   '/:id',
   validationMiddleware(commentValidators.updateCommentSchema),
-  allowRoles('ADMIN', 'AGENT'),
   verifyjwt,
   commentController.updateComment,
 );

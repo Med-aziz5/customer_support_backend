@@ -13,7 +13,11 @@ router.get(
   historyController.getAllHistory,
 );
 
-router.get('/tickets/:id', verifyJWT, historyController.getHistoryByTicket);
+router.get(
+  '/tickets/:ticketId',
+  verifyJWT,
+  historyController.getHistoryByTicket,
+);
 
 router.delete(
   ':id',

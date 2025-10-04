@@ -4,28 +4,41 @@ services:
   db:
     image: postgres:15
     container_name: customer_support_db
+    restart: always
+    env_file: .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: cs_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - '5432:5432'
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: .
     container_name: customer_support_backend
+    restart: always
+    env_file: .env
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: cs_db
-    ports:
-      - '3000:3000'
+      DB_HOST: customer_support_db
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      PORT: ${PORT}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    ports:
+      - '${PORT}:${PORT}'
+    command: >
+      sh -c "node scripts/liquibase-migrate.js && npm run start-local"
 
 volumes:
   db_data:

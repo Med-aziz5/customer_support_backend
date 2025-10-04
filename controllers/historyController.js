@@ -13,13 +13,13 @@ const getAllHistory = async (req, res, next) => {
 
 const getHistoryByTicket = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { ticketId } = req.params;
 
-    const ticket = await Ticket.findByPk(id);
+    const ticket = await Ticket.findByPk(ticketId);
     if (!ticket) throw new NotFoundError('Ticket not found.', 'Ticket');
 
     const histories = await History.findAll({
-      where: { ticket_id: id },
+      where: { ticket_id: ticketId },
       includes: [
         { model: user, as: 'user', attributes: ['id', 'email', 'role'] },
       ],
