@@ -40,5 +40,15 @@ services:
     command: >
       sh -c "node scripts/liquibase-migrate.js && npm run start-local"
 
+  frontend:
+    build:
+      context: ../fronte/fronte # path to your Angular project folder
+      dockerfile: Dockerfile
+    container_name: customer_support_frontend
+    ports:
+      - '4200:80' # host 4200 → container 80
+    depends_on:
+      - backend
+
 volumes:
   db_data:
