@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      DB_HOST: customer_support_db
+      DB_HOST: db
       DB_PORT: ${DB_PORT}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -40,6 +40,9 @@ services:
         condition: service_healthy
     ports:
       - '${PORT}:${PORT}'
+    volumes:
+      - .:/app
+      - /app/node_modules
     command: >
       sh -c "node scripts/liquibase-migrate.js && npm run start-local"
 
@@ -47,9 +50,15 @@ services:
     build:
       context: ../fronte/fronte
       dockerfile: Dockerfile
+    platform: linux/amd64
     container_name: customer_support_frontend
     ports:
-      - '4200:80'
+      - '4200:4200'
+    volumes:
+      - ../fronte/fronte:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
 
